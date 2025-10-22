@@ -6,6 +6,7 @@
 /data/
 *local_settings.py
 /.vscode/
+/media/
 # Scrapy output files
 
 *.jl
