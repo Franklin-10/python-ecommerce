@@ -3,6 +3,7 @@ from django.db import models
 from PIL import Image
 from django.conf import settings
 import os
+from utils.rands import slugify_new
 
 
 # Create your models here.
@@ -12,9 +13,9 @@ class Produto(models.Model):
     descricao_curta = models.TextField(max_length=255)
     descricao_longa = models.TextField()
     imagem = models.ImageField(upload_to='produto_imagens/%Y/%m/')
-    slug = models.SlugField(unique=True)
-    preco_exibicao = models.FloatField(default=0)
-    preco_promocional = models.FloatField(default=0)
+    slug = models.SlugField(unique=True, blank=True)
+    preco_exibicao = models.FloatField(verbose_name='Preço')
+    preco_promocional = models.FloatField(verbose_name='Preço Promocional')
     tipo = models.CharField(
         default='V', 
         max_length=1, 
@@ -23,6 +24,15 @@ class Produto(models.Model):
             ('S', 'Simples'),
         )
     )
+
+    def get_preco_formatado(self):
+        return f'R$ {self.preco_exibicao:.2f}'.replace('.', ',')
+    get_preco_formatado.short_description = 'Preço'
+    
+    def get_preco_promocional_formatado(self):
+        return f'R$ {self.preco_promocional:.2f}'.replace('.', ',')
+    get_preco_promocional_formatado.short_description = 'Preço Promo.'
+
     @staticmethod
     def resize_image(img, new_width=800):
         img_fullpath = os.path.join(settings.MEDIA_ROOT, img.name)
@@ -44,6 +54,8 @@ class Produto(models.Model):
         print('Imagem redimensionada')
     
     def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify_new(self.nome, 4)
         super().save(*args, **kwargs)
 
         max_image_size = 800
