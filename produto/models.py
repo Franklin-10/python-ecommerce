@@ -4,6 +4,7 @@ from PIL import Image
 from django.conf import settings
 import os
 from utils.rands import slugify_new
+from utils.utils import formata_preco
 
 
 # Create your models here.
@@ -15,7 +16,7 @@ class Produto(models.Model):
     imagem = models.ImageField(upload_to='produto_imagens/%Y/%m/')
     slug = models.SlugField(unique=True, blank=True)
     preco_exibicao = models.FloatField(verbose_name='Preço')
-    preco_promocional = models.FloatField(verbose_name='Preço Promocional')
+    preco_promocional = models.FloatField(verbose_name='Preço Promocional', blank=True, default=0)
     tipo = models.CharField(
         default='V', 
         max_length=1, 
@@ -26,11 +27,11 @@ class Produto(models.Model):
     )
 
     def get_preco_formatado(self):
-        return f'R$ {self.preco_exibicao:.2f}'.replace('.', ',')
+        return formata_preco(self.preco_exibicao)
     get_preco_formatado.short_description = 'Preço'
     
     def get_preco_promocional_formatado(self):
-        return f'R$ {self.preco_promocional:.2f}'.replace('.', ',')
+        return formata_preco(self.preco_promocional)
     get_preco_promocional_formatado.short_description = 'Preço Promo.'
 
     @staticmethod
